@@ -1,0 +1,15 @@
+version: '2'
+services:
+  biojs-builder:
+    command: /bin/sh -c "npm i && npm run make && npm run startDev"
+    image: node:10
+    working_dir: /opt
+    volumes:
+      - .:/opt
+    environment:
+      TERM: dumb
+    networks:
+      - service
+
+networks:
+  service:
