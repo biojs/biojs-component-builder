@@ -7,17 +7,12 @@ const REGISTRY_URL = 'http://registry.npmjs.org';
 const components_prefix = 'components/';
 
 export function download(url: string, targetPath: string): Promise<string> {
-  // const module_path = '';
-  // const module_name = 'mplexviz-ngraph';
-  // const module_name = 'cytoscape';
-  // const module_version = '1.1.4';
-
   return new Promise((res, rej) => {
     console.log(`Downloading tarball from ${url}...`);
     const s = request(url).pipe(
       tar.x({
         strip: 1,
-        C: targetPath, // alias for cwd:'some-dir', also ok
+        C: targetPath,
       }),
     );
     s.on('end', () => res(targetPath));
@@ -46,10 +41,8 @@ export function build(options: BuildCmd): Promise<string> {
   const local_path = `${process.cwd()}/${components_prefix}${module_name}/${module_version}`;
   // check if build folder exists
   if (folderExists(local_path)) {
-    console.log('exists!');
     return Promise.resolve(`${local_path}/biojs-build/build.js`);
   }
-  // https://registry.npmjs.org/@repositive/iris/-/iris-1.0.0-alpha.8.tgz
   console.log(`No build available for ${module_name}@${module_version}`);
   console.log('Creating directory...');
   mkdirSync(local_path, { recursive: true });
@@ -58,7 +51,6 @@ export function build(options: BuildCmd): Promise<string> {
   const url = `${REGISTRY_URL}/${module_path}-/${module_name}-${module_version}.tgz`;
   return download(url, local_path)
     .then((downloaded_path: string) => {
-
       // run npm i
       execSync('npm i', { cwd: downloaded_path });
       // build
@@ -81,11 +73,9 @@ export function build(options: BuildCmd): Promise<string> {
       });
       compiler.run((err: any, stats: any) => {
         if (err || stats.hasErrors()) {
-          // Handle errors here
           console.log(err);
+          throw new Error('Couldn\'t build component!');
         }
-        console.log(stats);
-        console.log(stats.warnings);
       });
       // return link to build.js
       return `${downloaded_path}/biojs-build/build.js`;
