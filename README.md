@@ -4,4 +4,4 @@ This project is still work in progress and aims to replace the old [workmen](htt
 
 ## Contributing
 
-Any contributions are welcome. Please contact BioJS on [Gitter](https://gitter.im/biojs) or dennis@repositive.io for more info.
+Any contributions are welcome. Please contact BioJS on [Gitter](https://gitter.im/biojs/biojs) or dennis@repositive.io for more info.
