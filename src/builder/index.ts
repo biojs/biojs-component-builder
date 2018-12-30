@@ -39,6 +39,7 @@ export async function build(options: ComponentInfo, h: ResponseToolkit): Promise
   const local_path = `${process.cwd()}/${components_prefix}${module_name}/${module_version}`;
   const bundle_path = `${local_path}/biojs-build/${bundle_filename}`;
 
+  // TODO: Maybe store broken builts in folder names or sth and return an error on retry.
   if (existsSync(bundle_path)) {
     return { built: true, path: bundle_path };
   }
@@ -46,7 +47,6 @@ export async function build(options: ComponentInfo, h: ResponseToolkit): Promise
   console.log(`No build available for ${module_name}@${module_version}`);
   console.log('Creating directory...');
   mkdirSync(local_path, { recursive: true });
-  // download if not
   const module_path = module_name.indexOf('@') > -1 ? `${module_name}/` : '';
   const url = `${REGISTRY_URL}/${module_path}-/${module_name}-${module_version}.tgz`;
   download(url, local_path)
@@ -96,7 +96,9 @@ export async function handleRequest(req: Request, h: ResponseToolkit): Promise<a
           .type('application/javascript')
           .header('Content-type', 'application/javascript');
       } else {
-        return h.response(`building...`);
+        return h.response('Compnent bundle not available. Building now...')
+          .code(302)
+          .header('Retry-After', '20');
       }
     });
 }
