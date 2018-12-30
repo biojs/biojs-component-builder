@@ -45,10 +45,9 @@
   "dependencies": {
     "@repositive/iris": "^1.0.0-alpha.8",
     "@types/webpack": "^4.4.19",
-    "boom": "^7.3.0",
     "config": "^3.0.0",
     "hapi": "^17.8.1",
-    "io-ts": "^1.5.1",
+    "joi": "^14.3.1",
     "request": "^2.88.0",
     "source-map-support": "^0.5.9",
     "tar": "^4.4.8",

@@ -1,4 +1,5 @@
 import * as config from 'config';
+import { string } from 'joi';
 import { handleRequest } from './builder';
 import { Server } from 'hapi';
 
@@ -16,7 +17,7 @@ export default async function init({
   // const module_version = '3.2.20';
   // const payload: BuildCmd = { module_name, module_version };
 
-    // Hapi server
+  // Hapi server
   const server = new Server({
     port: config.get('server.port'),
     routes: {
@@ -24,9 +25,18 @@ export default async function init({
     },
   });
 
+  const options = {
+    validate: {
+      query: {
+        module_name: string().min(1),
+        module_version: string().min(1).default('latest'),
+      },
+    },
+  };
+
   server.route([
     { method: 'GET', path: '/status', handler: () => 'ok' },
-    { method: 'POST', path: '/build', handler: handleRequest },
+    { method: 'GET', path: '/component', options, handler: handleRequest },
   ]);
   return server;
 }
