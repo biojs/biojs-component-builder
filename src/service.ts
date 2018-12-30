@@ -19,7 +19,7 @@ export default async function init({
 
   // Hapi server
   const server = new Server({
-    port: config.get('server.port'),
+    port: _config.get('server.port'),
     routes: {
       cors: true,
     },

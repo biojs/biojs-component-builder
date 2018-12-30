@@ -1,11 +1,17 @@
 import * as tar from 'tar';
 import * as request from 'request';
 import * as webpack from 'webpack';
-import { Request, RequestQuery } from 'hapi';
-import { mkdirSync, readFileSync, statSync } from 'fs';
+import { Request, ResponseToolkit, ResponseObject } from 'hapi';
+import { mkdirSync, readFileSync, statSync, createReadStream } from 'fs';
 import { execSync } from 'child_process';
 const REGISTRY_URL = 'http://registry.npmjs.org';
 const components_prefix = 'components/';
+const bundle_filename = 'main.js';
+
+export interface ComponentInfo {
+  module_name: string;
+  module_version: string;
+}
 
 export function download(url: string, targetPath: string): Promise<string> {
   return new Promise((res, rej) => {
@@ -32,12 +38,16 @@ function folderExists(path: string) {
   }
 }
 
-export function build(options: any): Promise<string> {
+export async function build(options: ComponentInfo, h: ResponseToolkit): Promise<ResponseObject> {
   const { module_name, module_version } = options;
   const local_path = `${process.cwd()}/${components_prefix}${module_name}/${module_version}`;
   // check if build folder exists
+  // TODO: Check if the build file actually exists! This could cause race-conditions
   if (folderExists(local_path)) {
-    return Promise.resolve(`${local_path}/biojs-build/build.js`);
+    const stream = createReadStream(`${local_path}/biojs-build/${bundle_filename}`);
+    return h.response(stream)
+      .type('application/javascript')
+      .header('Content-type', 'application/javascript');
   }
   console.log(`No build available for ${module_name}@${module_version}`);
   console.log('Creating directory...');
@@ -74,11 +84,11 @@ export function build(options: any): Promise<string> {
         }
       });
       // return link to build.js
-      return `${downloaded_path}/biojs-build/build.js`;
+      return h.response(`${downloaded_path}/biojs-build/${bundle_filename}`);
     });
 }
 
-export async function handleRequest(req: Request, rep: any): Promise<any> {
-  const query = req.query as RequestQuery;
-  return build(query);
+export async function handleRequest(req: Request, h: ResponseToolkit): Promise<any> {
+  const query = req.query as any; // Compiler doesn't get this.
+  return build(query, h);
 }
