@@ -1,9 +1,13 @@
 import * as tar from 'tar';
 import * as request from 'request';
 import * as webpack from 'webpack';
+import * as R from 'ramda';
 import { Request } from 'hapi';
 import { mkdirSync, readFileSync, statSync } from 'fs';
 import { execSync } from 'child_process';
+import { BuildCmd, BuildCmdRuntime } from './types';
+import { badRequest } from 'boom';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 const REGISTRY_URL = 'http://registry.npmjs.org';
 const components_prefix = 'components/';
 
@@ -20,11 +24,6 @@ export function download(url: string, targetPath: string): Promise<string> {
   });
 }
 
-export interface BuildCmd {
-  module_name: string;
-  module_version: string;
-}
-
 function folderExists(path: string) {
   try {
       const stat = statSync(path);
@@ -37,9 +36,23 @@ function folderExists(path: string) {
   }
 }
 
-export async function handleRequest(req: Request): Promise<any> {
-  console.log(req.payload);
-  return Promise.resolve('');
+export async function handleRequest(req: Request, rep: any): Promise<any> {
+  const { payload } = req;
+  const payloadValidation = BuildCmdRuntime.decode(payload);
+  return payloadValidation
+    .map((p) => build(p))
+    .getOrElseL(() => {
+      const errString: string = PathReporter.report(payloadValidation).join();
+      console.log(errString);
+      const err = new Error(errString);
+      const newError: any = R.test(/invalid/gi, err.message) ?
+        badRequest(err.message, 'INVALID_PAYLOAD') :
+        badRequest(err.message);
+
+      // this is so Hapi passes the data along, see https://github.com/hapijs/boom/issues/49
+      newError.output.payload.data = newError.data;
+      throw newError;
+    });
 }
 
 export function build(options: BuildCmd): Promise<string> {
