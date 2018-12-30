@@ -8,6 +8,8 @@ services:
       - .:/opt
     environment:
       TERM: dumb
+    ports:
+      - 3000:3000
     networks:
       - service
 

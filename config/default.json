@@ -2,5 +2,8 @@
   "iris": {
     "uri": "amqp://guest:guest@rabbit",
     "namespace": "biojs-builder"
+  },
+  "server": {
+    "port": "3000"
   }
 }

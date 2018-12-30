@@ -1,6 +1,7 @@
 import * as tar from 'tar';
 import * as request from 'request';
 import * as webpack from 'webpack';
+import { Request } from 'hapi';
 import { mkdirSync, readFileSync, statSync } from 'fs';
 import { execSync } from 'child_process';
 const REGISTRY_URL = 'http://registry.npmjs.org';
@@ -34,6 +35,11 @@ function folderExists(path: string) {
       }
       throw err;
   }
+}
+
+export async function handleRequest(req: Request): Promise<any> {
+  console.log(req.payload);
+  return Promise.resolve('');
 }
 
 export function build(options: BuildCmd): Promise<string> {
