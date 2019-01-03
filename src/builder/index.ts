@@ -75,7 +75,7 @@ export async function install(downloaded_path: string) {
   console.log(`Starting to install dependecies in ${downloaded_path}...`);
   return exec('npm i', { cwd: downloaded_path })
     .then((res) => {
-      console.log(`Done installing! ${res.stdout}${res.stderr}`);
+      console.log(`Done installing!`);
       return res;
     });
 }
@@ -119,9 +119,10 @@ export async function handleRequest(req: Request, h: ResponseToolkit): Promise<a
           .type('application/javascript')
           .header('Content-type', 'application/javascript');
       } else {
-        return h.response('Compnent bundle not available. Building now...')
-          .code(302)
-          .header('Retry-After', '20');
+        const response = h.response('Component bundle not available. Building now...')
+          .header('Retry-After', '20')
+          .code(302);
+        return response;
       }
     });
 }
