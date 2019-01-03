@@ -3,5 +3,8 @@
     "uri": "RABBIT_URI",
     "exchange": "RABBIT_EXCHANGE",
     "namespace": "IRIS_NAMESPACE"
+  },
+  "server": {
+    "port": "SERVER_PORT"
   }
 }
